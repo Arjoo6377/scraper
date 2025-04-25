@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRISIL Fund Performance Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 50px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #1557b0;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+        }
+        .loading {
+            display: none;
+            margin-top: 20px;
+        }
+        .download-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #1a73e8;
+            text-decoration: none;
+        }
+        .download-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CRISIL Fund Performance Data</h1>
+        <p>Click the button below to fetch the latest fund performance data and download as Excel</p>
+        <button id="generateBtn" onclick="generateExcel()">Download Fund Performance Data</button>
+        <div id="status"></div>
+        <div class="loading" id="loading">
+            <p>Fetching data from CRISIL... Please wait...</p>
+        </div>
+    </div>
+
+    <script>
+        function generateExcel() {
+            const button = document.getElementById('generateBtn');
+            const status = document.getElementById('status');
+            const loading = document.getElementById('loading');
+            
+            // Disable button and show loading
+            button.disabled = true;
+            loading.style.display = 'block';
+            status.innerHTML = '';
+
+            // Make API call
+            fetch('/generate_excel')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Create download link
+                        status.innerHTML = `
+                            <p style="color: green;">Excel file generated successfully!</p>
+                            <a href="/download/${data.filename}" class="download-link">
+                                Click here to download the Excel file
+                            </a>
+                        `;
+                        // Trigger download automatically
+                        window.location.href = `/download/${data.filename}`;
+                    } else {
+                        status.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                    }
+                })
+                .catch(error => {
+                    status.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                })
+                .finally(() => {
+                    // Re-enable button and hide loading
+                    button.disabled = false;
+                    loading.style.display = 'none';
+                });
+        }
+    </script>
+</body>
+</html>
